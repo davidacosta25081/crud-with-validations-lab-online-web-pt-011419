@@ -1,27 +1,54 @@
 class SongsController < ApplicationController
 
 
- validates :title, presence: true
- validates :title, uniqueness: {
-     scope: %i[release_year artist_name],
-     message: 'cannot be repeated by the same artist in the same year'
-   }
-   validates :released, inclusion: { in: [true, false] }
-   validates :artist_name, presence: true
+    def index
+      @songs = Song.all
+    end
 
-     with_options if: :released? do |song|
-       song.validates :release_year, presence: true
-       song.validates :release_year, numericality: {
-         less_than_or_equal_to: Date.today.year
-       }
-     end
+    def show
+      @song = Song.find(params[:id])
+    end
 
-     def released?
-    released
+    def new
+      @song = Song.new
+    end
+
+    def edit
+      @song = Song.find(params[:id])
+    end
+
+    def create
+      @song = Song.new(song_params)
+      if @song.save
+        redirect_to @song
+      else
+        render :new
+      end
+    end
+
+    def update
+      @song = Song.find(params[:id])
+      if @song.update(song_params)
+        redirect_to @song
+      else
+        render :edit
+      end
+    end
+
+    def destroy
+      @song = Song.find(params[:id])
+      @song.destroy
+      redirect_to songs_url
+    end
+
+    private
+
+    def song_params
+      params.require(:song).permit(
+        :title, :release_year, :released, :genre, :artist_name
+      )
+    end
   end
-
-
-
 
 
 
